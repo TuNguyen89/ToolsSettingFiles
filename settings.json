@@ -1,0 +1,8 @@
+{
+    "workbench.colorTheme": "Visual Studio Light",
+    "git.ignoreMissingGitWarning": true,
+    "[python]": {},
+    "editor.fontSize": 16,
+    "editor.minimap.enabled": false,
+    "editor.renderWhitespace": "boundary"
+}
