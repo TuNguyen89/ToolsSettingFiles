@@ -1,0 +1,151 @@
+#  ---------------------------------------------------------------------------
+#
+#  Description:  This file holds all my BASH configurations and aliases
+#
+#  Sections:
+#  1.   Environment Configuration
+#  2.   Make Terminal Better (remapping defaults and adding functionality)
+#  3.   File and Folder Management
+#  4.   Searching
+#  5.   Process Management
+#  6.   Networking
+#  7.   System Operations & Information
+#  8.   Web Development
+#  9.   Reminders & Notes
+#
+#  ---------------------------------------------------------------------------
+#   -------------------------------
+#   1.  ENVIRONMENT CONFIGURATION
+#   -------------------------------
+
+alias cp='cp -iv'                           # Preferred 'cp' implementation
+alias mv='mv -iv'                           # Preferred 'mv' implementation
+alias mkdir='mkdir -pv'                     # Preferred 'mkdir' implementation
+alias rmdir='rm -rf'                        # Preferred 'rm' implemtation
+alias ll='ls -FGlAhp'                       # Preferred 'ls' implementation
+alias less='less -FSRXc'                    # Preferred 'less' implementation
+cd() { builtin cd "$@"; ll; }               # Always list directory contents upon 'cd'
+alias cd..='cd ../'                         # Go back 1 directory level (for fast typers)
+alias ..='cd ../'                           # Go back 1 directory level
+alias ...='cd ../../'                       # Go back 2 directory levels
+alias .3='cd ../../../'                     # Go back 3 directory levels
+alias .4='cd ../../../../'                  # Go back 4 directory levels
+alias .5='cd ../../../../../'               # Go back 5 directory levels
+alias .6='cd ../../../../../../'            # Go back 6 directory levels
+alias f='open -a Finder ./'                 # f:            Opens current directory in MacOS Finder
+alias ~="cd ~"                              # ~:            Go Home
+alias c='clear'                             # c:            Clear terminal display
+alias which='type -all'                     # which:        Find executables
+alias path='echo -e ${PATH//:/\\n}'         # path:         Echo all executable Paths
+alias show_options='shopt'                  # Show_options: display bash options settings
+alias fix_stty='stty sane'                  # fix_stty:     Restore terminal settings when screwed up
+alias cic='set completion-ignore-case On'   # cic:          Make tab-completion case-insensitive
+mcd () { mkdir -p "$1" && cd "$1"; }        # mcd:          Makes new Dir and jumps inside
+alias lr='ls -R | grep ":$" | sed -e '\''s/:$//'\'' -e '\''s/[^-][^\/]*\//--/g'\'' -e '\''s/^/   /'\'' -e '\''s/-/|/'\'' | less'
+#   mans:   Search manpage given in agument '1' for term given in argument '2' (case insensitive)
+#   #           displays paginated result with colored search terms and two lines surrounding each hit.             Example: mans mplayer codec
+#   #   --------------------------------------------------------------------
+#
+    mans () {
+        man $1 | grep -iC2 --color=always $2 | less
+    }
+#   showa: to remind yourself of an alias (given some part of it)
+#   #   ------------------------------------------------------------
+#
+    showa () { alias | grep --color=always -i -a1 $@ | grep -v '^\s*$' | less -FSRXc ; }
+
+if [ -f ~/.ssh_agent_nttu ]; then
+    . ~/.ssh_agent_nttu
+fi
+
+#   extract:  Extract most know archives with one command
+#   ---------------------------------------------------------
+       extract () {
+        if [ -f $1 ] ; then
+          case $1 in
+            *.tar.bz2)   tar xjf $1     ;;
+            *.tar.gz)    tar xzf $1     ;;
+            *.bz2)       bunzip2 $1     ;;
+            *.rar)       unrar e $1     ;;
+            *.gz)        gunzip $1      ;;
+            *.tar)       tar xf $1      ;;
+            *.tbz2)      tar xjf $1     ;;
+            *.tgz)       tar xzf $1     ;;
+            *.zip)       unzip $1       ;;
+            *.Z)         uncompress $1  ;;
+            *.7z)        7z x $1        ;;
+            *)     echo "'$1' cannot be extracted via extract()" ;;
+             esac
+         else
+             echo "'$1' is not a valid file"
+         fi
+    }
+
+#   check_internet: check the connectivity to the internet
+#   --------------------------------------------------------
+    check_internet() {
+        set +e
+        echo ""
+        echo "Checking internet connection..."
+        curl "http://github.com" > /dev/null 2>&1
+        if [ $? -ne 0 ]; then
+            echo "Unable to connect to internet"
+            exit 1
+        fi
+        echo "OK"
+        echo ""
+        set -e
+    }
+
+# ssh connections using sshpass for input the password
+export VDP_USER_NAME='nvidia'
+export VDP_PASSWORD='nvidia'
+export VDP_DIRECT_IP='192.168.50.1'
+export VDP_MY_FORD='19.7.64.223'
+export VDP_REMOTE_TEST_STAND_28='172.30.96.28'
+    vdp_ssh() {
+        if [ $1 ] ; then
+            BOARD_IP=$1
+        else
+            echo 'usage: vdp_ssh board_ip'
+            echo "Tring connect default board address ${VDP_DIRECT_IP}"
+            BOARD_IP=$VDP_DIRECT_IP
+        fi
+
+        
+        sshpass -p ${VDP_PASSWORD} scp ~/.bash_nttu ~/.ssh_agent_nttu ${VDP_USER_NAME}@${BOARD_IP}:~/
+        
+        sshpass -p ${VDP_PASSWORD} rsync -r ~/.ssh ${VDP_USER_NAME}@${BOARD_IP}:~/
+
+        sshpass -p ${VDP_PASSWORD} ssh -Y -o StrictHostKeyChecking=no ${VDP_USER_NAME}@${BOARD_IP}
+    }
+
+alias ford_vdp_ssh='vdp_ssh ${VDP_MY_FORD}'
+alias 28_test_stand_ssh='vdp_ssh ${VDP_REMOTE_TEST_STAND_28}'
+
+
+
+alias libvhat='dpkg --status libdbmanager librecognition vhat truthdbcollector'
+alias libvhat_install='dpkg --listfiles libdbmanager librecognition vhat truthdbcollector'
+alias stopvhat='sudo systemctl stop vdp_ate_server.service'
+alias revhat='sudo systemctl restart vdp_ate_server.service'
+alias stopmedia='sudo systemctl stop vdp_media_server.service'
+alias remedia='sudo systemctl restart vdp_media_server.service'
+alias getdate='sudo date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d" " -f5-8)Z"'
+alias goicnstorage='cd /var/lib/vdp/vhat/icon_storage/'
+alias prxoff='~/toggle-proxy.sh --disable'
+alias prxon='~/toggle-proxy.sh --enable'
+
+
+export DOTNET_CLI_TELEMETRY_OPTOUT=1
+
+#export http_proxy=http://internet.ford.com:83
+#export https_proxy=http://internet.ford.com:83
+#export HTTP_PROXY=http://internet.ford.com:83
+#export HTTPS_PROXY=http://internet.ford.com:83
+#export no_proxy="127.0.0.1,localhost,localhost.localdomain,.ge.com,*.ge.com,*ge.com"
+unset http_proxy
+unset https_proxy
+unset HTTP_PROXY
+unset HTTPS_PROXY
+unset no_proxy
